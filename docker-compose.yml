@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: eagle-bank-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: eagle_user
+      POSTGRES_PASSWORD: eagle_password
+      POSTGRES_DB: eagle_bank
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
