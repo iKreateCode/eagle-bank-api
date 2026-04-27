@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../../src/lib/prisma";
-import { createUserId } from "../../src/lib/id";
+import { createUserId, createAccountNumber } from "../../src/lib/id";
 import { generateToken } from "./auth";
 
 export async function cleanDb() {
@@ -32,4 +32,16 @@ export async function createTestUser(overrides: { email?: string; name?: string 
 
   const token = generateToken(user.id, user.email);
   return { user, token };
+}
+
+export async function createTestAccount(userId: string, overrides: { name?: string } = {}) {
+  const account = await prisma.bankAccount.create({
+    data: {
+      accountNumber: createAccountNumber(),
+      name: overrides.name ?? "Test Account",
+      accountType: "personal",
+      userId,
+    },
+  });
+  return { account };
 }
