@@ -1,0 +1,625 @@
+{
+  "info": {
+    "name": "Eagle Bank API",
+    "description": "Complete collection for the Eagle Bank REST API. Set the `baseUrl` variable if your server runs on a different port.\n\nWorkflow:\n1. Create User → captures `userId`\n2. Login → captures `token`\n3. Create Account → captures `accountNumber`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token — auto-set by the Login request"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string",
+      "description": "Auto-set by Create User"
+    },
+    {
+      "key": "accountNumber",
+      "value": "",
+      "type": "string",
+      "description": "Auto-set by Create Account"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Returns `{ status: \"ok\" }` when the server is running."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"status\": \"ok\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('Token saved:', json.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "login"]
+            },
+            "description": "Authenticates a user and returns a JWT token. The test script automatically stores the token in the `token` collection variable."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
+            },
+            {
+              "name": "401 Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "auth", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"message\": \"Invalid credentials\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('userId', json.id);",
+                  "    console.log('User ID saved:', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+447911123456\",\n  \"address\": {\n    \"line1\": \"123 High Street\",\n    \"line2\": \"Flat 4\",\n    \"town\": \"London\",\n    \"county\": \"Greater London\",\n    \"postcode\": \"EC1A 1BB\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users"]
+            },
+            "description": "Creates a new user account. No authentication required. Auto-saves the returned `id` as the `userId` variable."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+447911123456\",\n  \"address\": {\n    \"line1\": \"123 High Street\",\n    \"town\": \"London\",\n    \"county\": \"Greater London\",\n    \"postcode\": \"EC1A 1BB\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "users"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"id\": \"usr-abc123\",\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phoneNumber\": \"+447911123456\",\n  \"address\": {\n    \"line1\": \"123 High Street\",\n    \"town\": \"London\",\n    \"county\": \"Greater London\",\n    \"postcode\": \"EC1A 1BB\"\n  },\n  \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedTimestamp\": \"2026-01-01T00:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "{{userId}}"]
+            },
+            "description": "Returns the authenticated user's details. The token's userId must match the `userId` param."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "users", "{{userId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"id\": \"usr-abc123\",\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phoneNumber\": \"+447911123456\",\n  \"address\": {\n    \"line1\": \"123 High Street\",\n    \"town\": \"London\",\n    \"county\": \"Greater London\",\n    \"postcode\": \"EC1A 1BB\"\n  },\n  \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedTimestamp\": \"2026-01-01T00:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated Doe\",\n  \"phoneNumber\": \"+447911999888\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "{{userId}}"]
+            },
+            "description": "Partially updates the user. All fields are optional: `name`, `email`, `phoneNumber`, `address`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{token}}"},
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Updated Doe\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "users", "{{userId}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"id\": \"usr-abc123\",\n  \"name\": \"John Updated Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phoneNumber\": \"+447911999888\",\n  \"address\": {\n    \"line1\": \"123 High Street\",\n    \"town\": \"London\",\n    \"county\": \"Greater London\",\n    \"postcode\": \"EC1A 1BB\"\n  },\n  \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedTimestamp\": \"2026-01-01T12:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "users", "{{userId}}"]
+            },
+            "description": "Deletes the user. Returns 409 if the user still has bank accounts open."
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "users", "{{userId}}"]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "body": ""
+            },
+            {
+              "name": "409 Has Accounts",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "users", "{{userId}}"]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"message\": \"User cannot be deleted while they have bank accounts\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Create Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('accountNumber', json.accountNumber);",
+                  "    console.log('Account number saved:', json.accountNumber);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Current Account\",\n  \"accountType\": \"personal\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "accounts"]
+            },
+            "description": "Creates a new bank account for the authenticated user. Auto-saves the returned `accountNumber` variable.\n\n`accountType` must be `\"personal\"`."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{token}}"},
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"My Current Account\",\n  \"accountType\": \"personal\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "accounts"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"accountNumber\": \"01123456\",\n  \"sortCode\": \"10-10-10\",\n  \"name\": \"My Current Account\",\n  \"accountType\": \"personal\",\n  \"balance\": 0,\n  \"currency\": \"GBP\",\n  \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedTimestamp\": \"2026-01-01T00:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "accounts"]
+            },
+            "description": "Returns all bank accounts belonging to the authenticated user."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "accounts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"accounts\": [\n    {\n      \"accountNumber\": \"01123456\",\n      \"sortCode\": \"10-10-10\",\n      \"name\": \"My Current Account\",\n      \"accountType\": \"personal\",\n      \"balance\": 0,\n      \"currency\": \"GBP\",\n      \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n      \"updatedTimestamp\": \"2026-01-01T00:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Account",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/accounts/{{accountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "accounts", "{{accountNumber}}"]
+            },
+            "description": "Returns a single bank account by account number (format: `01XXXXXX`)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/accounts/{{accountNumber}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "accounts", "{{accountNumber}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"accountNumber\": \"01123456\",\n  \"sortCode\": \"10-10-10\",\n  \"name\": \"My Current Account\",\n  \"accountType\": \"personal\",\n  \"balance\": 0,\n  \"currency\": \"GBP\",\n  \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedTimestamp\": \"2026-01-01T00:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Savings Account\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/accounts/{{accountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "accounts", "{{accountNumber}}"]
+            },
+            "description": "Partially updates an account. Updatable fields: `name`, `accountType`."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {"key": "Authorization", "value": "Bearer {{token}}"},
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"My Savings Account\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/v1/accounts/{{accountNumber}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "accounts", "{{accountNumber}}"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "body": "{\n  \"accountNumber\": \"01123456\",\n  \"sortCode\": \"10-10-10\",\n  \"name\": \"My Savings Account\",\n  \"accountType\": \"personal\",\n  \"balance\": 0,\n  \"currency\": \"GBP\",\n  \"createdTimestamp\": \"2026-01-01T00:00:00.000Z\",\n  \"updatedTimestamp\": \"2026-01-01T12:00:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/accounts/{{accountNumber}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "accounts", "{{accountNumber}}"]
+            },
+            "description": "Deletes a bank account."
+          },
+          "response": [
+            {
+              "name": "204 No Content",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [{"key": "Authorization", "value": "Bearer {{token}}"}],
+                "url": {
+                  "raw": "{{baseUrl}}/v1/accounts/{{accountNumber}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["v1", "accounts", "{{accountNumber}}"]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "body": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
